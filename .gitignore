@@ -110,4 +110,7 @@ venv.bak/
 course_1_introduction_to_deep_learning/readonly/
 weights.h5
 *.hdf5
+*.tgz
+*.mat
+*delme*
 
