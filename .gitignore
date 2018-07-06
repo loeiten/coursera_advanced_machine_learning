@@ -108,11 +108,19 @@ venv.bak/
 
 # Other
 course_1_introduction_to_deep_learning/readonly/
+annotations
+checkpoint
 weights.h5
+*.swp
 *.hdf5
 *.h5
 *.tgz
 *.mat
+*.zip
+*.index
+*.meta
+*.pickle
+*.data*
 *delme*
 lfw_attributes.txt
 
