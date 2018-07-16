@@ -123,4 +123,5 @@ weights.h5
 *.data*
 *delme*
 lfw_attributes.txt
+*.csv
 
