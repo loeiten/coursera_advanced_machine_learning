@@ -125,4 +125,5 @@ weights.h5
 lfw_attributes.txt
 *.csv
 ~*
+._*
 
