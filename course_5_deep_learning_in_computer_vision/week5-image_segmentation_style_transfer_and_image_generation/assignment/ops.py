@@ -132,7 +132,7 @@ def lrelu(x, leak=0.2, name='lrelu'):
 
     
 def deconv2d(input_, 
-             output_dim,
+             output_dims,
              k_h=5, 
              k_w=5,
              d_h=2,
@@ -152,8 +152,9 @@ def deconv2d(input_,
     ----------
     input_ : Tensor, shape (n_batch, in_rows, in_cols, in_depth)
         The tensor to which the 2d convolution should be applied to
-    output_dim : int
-        Number of filters
+    output_dims : array-like, shape (4,)
+        The output dimensions given as
+        >>> (batch_size, height, widths, depth)
     k_h : int
         Kernel height
     k_w : int
@@ -176,23 +177,23 @@ def deconv2d(input_,
     with tf.variable_scope(name):
         # filter : [height, width, output_channels, in_channels]
         w = tf.get_variable('w',
-                            [k_h, k_w, output_dim[-1], input_.get_shape()[-1]],
+                            [k_h, k_w, output_dims[-1], input_.get_shape()[-1]],
                             initializer=tf.random_normal_initializer(stddev=stddev))
 
         try:
             deconv = tf.nn.conv2d_transpose(input_,
                                             w, 
-                                            output_shape=output_dim,
+                                            output_shape=output_dims,
                                             strides=[1, d_h, d_w, 1])
 
         # Support for verisons of TensorFlow before 0.7.0
         except AttributeError:
             deconv = tf.nn.deconv2d(input_,
                                     w, 
-                                    output_shape=output_dim,
+                                    output_shape=output_dims,
                                     strides=[1, d_h, d_w, 1])
 
-        biases = tf.get_variable('biases', [output_dim[-1]], initializer=tf.constant_initializer(0.0))
+        biases = tf.get_variable('biases', [output_dims[-1]], initializer=tf.constant_initializer(0.0))
         deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
 
         if with_w:
