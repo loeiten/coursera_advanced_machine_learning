@@ -5,7 +5,6 @@
 import math
 import numpy as np
 import tensorflow as tf
-from utils import *
 
 
 class BatchNorm(object):
@@ -52,7 +51,7 @@ class BatchNorm(object):
             The result of batch normalization
         """
         return tf.contrib.layers.batch_norm(x, decay=self.momentum, updates_collections=None, epsilon=self.epsilon,
-                                            center=True, scale=True, is_training=train, scope=self.name)
+                                            center=True, scale=True, is_training=is_training, scope=self.name)
 
 def conv2d(input_,
            output_dim,
@@ -63,7 +62,7 @@ def conv2d(input_,
            stddev=0.02,
            name='conv2d'):
     """
-    2D convolutional layer
+    Performs 2D convolution
 
     Notes
     -----
@@ -109,30 +108,91 @@ def conv2d(input_,
         return conv
 
     
-def lrelu(x, leak=0.2, name="lrelu"):
+def lrelu(x, leak=0.2, name='lrelu'):
+    """
+    Leaky relu implementation
+    
+    Parameters
+    ----------
+    x : Tensor, shape (...)
+        The tensor to perform the leaky relu operation on
+    leaky : float
+        The amount of leak
+    name : str
+    
+    Returns
+    -------
+    Tensor, shape (...)
+        The tensor after the operation has been performed
+    """
     with tf.variable_scope(name):
         f1 = 0.5 * (1 + leak)
         f2 = 0.5 * (1 - leak)
         return f1 * x + f2 * abs(x)
 
     
-def deconv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
-       name="deconv2d", with_w=False):
+def deconv2d(input_, 
+             output_dim,
+             k_h=5, 
+             k_w=5,
+             d_h=2,
+             d_w=2,
+             stddev=0.02,
+             name='deconv2d',
+             with_w=False):
+    """
+    Performs the deconvolution operation
+    
+    Notes
+    -----
+    The weigths are initialized with a gaussian initializer,
+    whereas the biases are initialized with a constant value
+
+    Parameters
+    ----------
+    input_ : Tensor, shape (n_batch, in_rows, in_cols, in_depth)
+        The tensor to which the 2d convolution should be applied to
+    output_dim : int
+        Number of filters
+    k_h : int
+        Kernel height
+    k_w : int
+        Kernel width
+    d_h : int
+        Stride height
+    d_w : int
+        Stride width
+    stddev : float
+        The standard deviation to use for the Gaussian initializer for the weights
+    name : str
+        Name of the variable scope
+        
+    Return
+    ------
+    Tensor, shape (n_batch, d_h * (in_rows-1) + k_h - 2*padding, d_h * (in_rows-1) + k_h - 2*padding, output_shape)
+        The result of the deconvolution
+    """
+    
     with tf.variable_scope(name):
         # filter : [height, width, output_channels, in_channels]
-        w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
-                  initializer=tf.random_normal_initializer(stddev=stddev))
+        w = tf.get_variable('w',
+                            [k_h, k_w, output_dim[-1], input_.get_shape()[-1]],
+                            initializer=tf.random_normal_initializer(stddev=stddev))
 
         try:
-            deconv = tf.nn.conv2d_transpose(input_, w, output_shape=output_shape,
-                    strides=[1, d_h, d_w, 1])
+            deconv = tf.nn.conv2d_transpose(input_,
+                                            w, 
+                                            output_shape=output_dim,
+                                            strides=[1, d_h, d_w, 1])
 
         # Support for verisons of TensorFlow before 0.7.0
         except AttributeError:
-            deconv = tf.nn.deconv2d(input_, w, output_shape=output_shape,
-                    strides=[1, d_h, d_w, 1])
+            deconv = tf.nn.deconv2d(input_,
+                                    w, 
+                                    output_shape=output_dim,
+                                    strides=[1, d_h, d_w, 1])
 
-        biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+        biases = tf.get_variable('biases', [output_dim[-1]], initializer=tf.constant_initializer(0.0))
         deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
 
         if with_w:
