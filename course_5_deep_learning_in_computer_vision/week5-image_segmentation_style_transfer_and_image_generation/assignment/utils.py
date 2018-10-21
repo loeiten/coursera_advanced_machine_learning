@@ -37,7 +37,7 @@ def save_images(images, size, image_path):
     images : np.array (n_img, width, heigth, channels)
         The images to be saved
     size : array-like, shape (2,)
-        Width and height of the images
+        Rows and cols of the resulting image
     path : Path or str
         Save path om the image
     """
@@ -70,7 +70,7 @@ def merge_images(images, size):
     images : np.array (n_img, width, heigth, 3)
         The images to be merged
     size : array-like, shape (2,)
-        Width and height of the images
+        Rows and cols of the resulting image
     
     Returns
     --------
@@ -89,7 +89,7 @@ def merge(images, size):
     images : np.array (n_img, width, heigth, 3)
         The images to be merged
     size : array-like, shape (2,)
-        Width and height of the images
+        Rows and cols of the resulting image
         
     Returns
     -------
@@ -114,7 +114,7 @@ def imsave(images, size, path):
     images : np.array (n_img, width, heigth, channels)
         The images to be saved
     size : array-like, shape (2,)
-        Width and height of the images
+        Rows and cols of the resulting image
     path : Path or str
         Save path om the image
     """
@@ -181,11 +181,11 @@ def center_crop(img, crop_h, crop_w=None):
     
     if crop_w is None:
         crop_w = crop_h
-    h, w = x.shape[:2]
+    h, w = img.shape[:2]
 
     j = h//2 - crop_h
     i = w//2 - crop_w
-    cropped = cv2.resize(x[j:j+crop_h*2, i:i+crop_w*2], (crop_h, crop_w))
+    cropped = cv2.resize(img[j:j+crop_h*2, i:i+crop_w*2], (crop_h, crop_w))
     
     return cropped
 
