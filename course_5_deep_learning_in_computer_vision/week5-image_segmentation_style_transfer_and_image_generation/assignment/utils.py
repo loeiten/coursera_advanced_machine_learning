@@ -1,9 +1,7 @@
 # Original Version: Taehoon Kim (http://carpedm20.github.io)
 #   + Source: https://github.com/carpedm20/DCGAN-tensorflow/blob/e30539fb5e20d5a0fed40935853da97e9e55eee8/utils.py
 #   + License: MIT
-import math
-import random
-import scipy.misc
+
 import numpy as np
 import cv2
 
@@ -119,7 +117,7 @@ def imsave(images, size, path):
         Save path om the image
     """
     img = merge(images, size)
-    cv2.imwrite(str(path), (255*img).astype(np.uint8))
+    cv2.imwrite(str(path), (255*inverse_transform(img)).astype(np.uint8))
 
 
 def transform(image, npx=64, is_crop=True):
