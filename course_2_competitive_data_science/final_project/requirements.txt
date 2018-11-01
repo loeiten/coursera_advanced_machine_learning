@@ -1,6 +1,6 @@
 matplotlib==2.2.2
 tensorflow==1.8.0
-requests==2.19.1
+requests==2.20.1
 Keras==2.2.0
 numpy==1.15.0
 nltk==3.3
