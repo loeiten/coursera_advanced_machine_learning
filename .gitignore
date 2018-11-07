@@ -126,4 +126,5 @@ lfw_attributes.txt
 *.csv
 ~*
 ._*
+logs/
 
