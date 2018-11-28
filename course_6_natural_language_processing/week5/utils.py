@@ -17,7 +17,19 @@ RESOURCE_PATH = {
 
 
 def text_prepare(text):
-    """Performs tokenization and simple preprocessing."""
+    """
+    Performs tokenization and simple preprocessing.
+    
+    Parameters
+    ----------
+    text : str
+        The text to prepare
+        
+    Returns
+    -------
+    str
+        The prepared text
+    """
     
     replace_by_space_re = re.compile('[/(){}\[\]\|@,;]')
     bad_symbols_re = re.compile('[^0-9a-z #+_]')

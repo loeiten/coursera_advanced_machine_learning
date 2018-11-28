@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import requests
 import time
@@ -61,10 +62,55 @@ class SimpleDialogueManager(object):
     This is the simplest dialogue manager to test the telegram bot.
     Your task is to create a more advanced one in dialogue_manager.py."
     """
-    
-    def generate_answer(self, question): 
-        return "Hello, world!" 
-        
+
+    def generate_answer(self, question):
+        return "Hello, world!"
+
+
+def cast_to_utf_8(old_dict):
+    """
+    Encodes the string content of a dict to utf-8
+
+    Parameters
+    ----------
+    old_dict : dict
+        The dict to encode
+
+    Returns
+    -------
+    new_dict : dict
+        The encoded dict
+    """
+
+    def walk(node):
+        """
+        Recursively traverses a node ande encodes all strings to utf-8
+
+        Parameters
+        ----------
+        node : dict
+            The node to traverse
+
+        Returns
+        -------
+        node : dict
+            The node where the strings are encoded to utf-8
+        """
+        for key, item in node.items():
+            if type(item)==dict:
+                walk(item)
+            elif type(item)==list:
+                for i, elem in enumerate(item):
+                    if type(elem) == str:
+                        node[key][i] = elem.encode('utf-8')
+            elif type(item)==str:
+                node[key] = item.encode('utf-8')
+        return node
+
+    new_dict = walk(old_dict)
+
+    return new_dict
+
 
 def main():
     args = parse_args()
@@ -77,16 +123,16 @@ def main():
         token = os.environ["TELEGRAM_TOKEN"]
 
     #################################################################
-    
-    # Your task is to complete dialogue_manager.py and use your 
-    # advanced DialogueManager instead of SimpleDialogueManager. 
-    
-    # This is the point where you plug it into the Telegram bot. 
+
+    # Your task is to complete dialogue_manager.py and use your
+    # advanced DialogueManager instead of SimpleDialogueManager.
+
+    # This is the point where you plug it into the Telegram bot.
     # Do not forget to import all needed dependencies when you do so.
-    
+
     simple_manager = SimpleDialogueManager()
     bot = BotHandler(token, simple_manager)
-    
+
     ###############################################################
 
     print("Ready to talk!")
@@ -100,6 +146,7 @@ def main():
                 if "text" in update["message"]:
                     text = update["message"]["text"]
                     if is_unicode(text):
+                        update = cast_to_utf_8(update)
                         print("Update content: {}".format(update))
                         bot.send_message(chat_id, bot.get_answer(update["message"]["text"]))
                     else:
@@ -109,3 +156,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
