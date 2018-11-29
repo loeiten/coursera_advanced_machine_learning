@@ -2,17 +2,18 @@ import nltk
 import pickle
 import re
 import numpy as np
+import pandas as pd
 
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 
 # Paths for all resources for the bot.
 RESOURCE_PATH = {
-    'INTENT_RECOGNIZER': 'intent_recognizer.pkl',
-    'TAG_CLASSIFIER': 'tag_classifier.pkl',
-    'TFIDF_VECTORIZER': 'tfidf_vectorizer.pkl',
-    'THREAD_EMBEDDINGS_FOLDER': 'thread_embeddings_by_tags',
-    'WORD_EMBEDDINGS': 'word_embeddings.tsv',
+    'INTENT_RECOGNIZER': ['resource', 'intent_recognizer.pkl'],
+    'TAG_CLASSIFIER': ['resource', 'tag_classifier.pkl'],
+    'TFIDF_VECTORIZER': ['resource', 'tfidf_vectorizer.pkl'],
+    'THREAD_EMBEDDINGS_FOLDER': ['resource', 'thread_embeddings_by_tags'],
+    'WORD_EMBEDDINGS': ['resource', 'word_embeddings.tsv'],
 }
 
 
@@ -44,48 +45,112 @@ def text_prepare(text):
 
 
 def load_embeddings(embeddings_path):
-    """Loads pre-trained word embeddings from tsv file.
+    """
+    Loads pre-trained word embeddings from tsv file.
 
-    Args:
-      embeddings_path - path to the embeddings file.
+    Parameters
+    ----------
+    embeddings_path : Path
+        Path to the embeddings file.
 
-    Returns:
-      embeddings - dict mapping words to vectors;
-      embeddings_dim - dimension of the vectors.
+    Returns
+    -------
+    embeddings : dict
+        Mapping of words to vectors
+    embeddings_dim : int 
+        Dimension of the vectors.
     """
     
-    # Hint: you have already implemented a similar routine in the 3rd assignment.
-    # Note that here you also need to know the dimension of the loaded embeddings.
-    # When you load the embeddings, use numpy.float32 type as dtype
-
-    ########################
-    #### YOUR CODE HERE ####
-    ########################
-
-    # remove this when you're done
-    raise NotImplementedError(
-        "Open utils.py and fill with your code. In case of Google Colab, download"
-        "(https://github.com/hse-aml/natural-language-processing/blob/master/project/utils.py), "
-        "edit locally and upload using '> arrow on the left edge' -> Files -> UPLOAD")
-
-
-def question_to_vec(question, embeddings, dim):
-    """Transforms a string to an embedding by averaging word embeddings."""
+    embeddings_df = pd.read_csv(embeddings_path, 
+                                sep='\t',
+                                header=None)
     
-    # Hint: you have already implemented exactly this function in the 3rd assignment.
+    # Convert to dict
+    words = embeddings_df.loc[:, 0].values
+    vectors = embeddings_df.loc[:, 1:].values
+    vectors.dtype = np.float32
 
-    ########################
-    #### YOUR CODE HERE ####
-    ########################
+    embeddings = dict()
+    
+    for word, vector in zip(words, vectors):
+        embeddings[word] = vector
 
-    # remove this when you're done
-    raise NotImplementedError(
-        "Open utils.py and fill with your code. In case of Google Colab, download"
-        "(https://github.com/hse-aml/natural-language-processing/blob/master/project/utils.py), "
-        "edit locally and upload using '> arrow on the left edge' -> Files -> UPLOAD")
+    # Extract dimension
+    embeddings_dim = vectors.shape[1]
+    return embeddings, embeddings_dim
 
 
-def unpickle_file(filename):
-    """Returns the result of unpickling the file content."""
-    with open(filename, 'rb') as f:
+def question_to_vec(question, embeddings, dim=300, verbose=False):
+    """
+    Transform a question to a string by taking the mean
+    
+    Parameters
+    ----------
+    question : str
+        The quering question
+    embeddings : dict-like
+        A dict-like structure where the key is a word and its value is the embedding
+    dim : int
+        Size of the representation
+    verbose : bool
+        Whether or not to print information
+
+    Returns
+    -------
+    result : np.array
+        The vector representation of the question
+    """
+
+    result = np.zeros(dim)
+    
+    count = 0
+    for word in question.split():
+        count += 1
+        try:
+            # wv_embeddings has the function .get_vector, however [] works for dicts as well
+            result += embeddings[word]
+        except KeyError:
+            if count > 0:
+                # Subtract expected count
+                count -= 1
+            if verbose:
+                print(f'"{word}" not in vocabulary')
+    
+    if count > 0:
+        result /= count
+            
+    return result
+
+    
+def pickle_file(content, path):
+    """
+    Pickle dumps a file
+    
+    Parameters
+    ----------
+    content : object
+        Content to pickle
+    path : Path
+        Path to the file
+    """
+    
+    with path.open('wb') as f:
+        pickle.dump(content, f, pickle.HIGHEST_PROTOCOL)  
+
+        
+def unpickle_file(path):
+    """
+    Returns the result of unpickling the file content.
+    
+    Parameters
+    ----------
+    path : Path
+        Path to the file
+    
+    Returns
+    -------
+    object
+        The unpickled file
+    """
+    with path.open('rb') as f:
         return pickle.load(f)
