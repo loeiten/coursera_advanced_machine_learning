@@ -172,7 +172,8 @@ class DialogueManager(object):
         prepared_question = text_prepare(question)
 
         if prepared_question == '':
-            return 'Wow, that text preparation left me with an empty string'
+            # Text preparation is an empty string, tf_idf won't work
+            return self.chatbot.get_response(question)
 
         features = self.tfidf_vectorizer.transform(prepared_question.split())
         intent = self.intent_recognizer.predict(features)[0]

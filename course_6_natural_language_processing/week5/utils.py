@@ -115,7 +115,7 @@ def question_to_vec(question, embeddings, dim=300, verbose=False):
                 # Subtract expected count
                 count -= 1
             if verbose:
-                print(f'"{word}" not in vocabulary')
+                print('"{}" not in vocabulary'.format(word))
     
     if count > 0:
         result /= count

@@ -13,6 +13,8 @@ from dialogue_manager import DialogueManager
 from utils import RESOURCE_PATH
 
 
+# NOTE: This may actually cause memory error
+# NOTE: scikit-learn=0.19.1 does not give memory error
 if 'UTF-8' not in sys.stdout.encoding:
     msg = ("Terminal can't handle UTF-8\n\n"
            "Try exporting:\n"
