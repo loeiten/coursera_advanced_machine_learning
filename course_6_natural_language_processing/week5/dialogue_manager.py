@@ -77,7 +77,8 @@ class ThreadRanker(object):
                                        dim=thread_embeddings.shape[1])
 
         best_thread = pairwise_distances_argmin(question_vec[np.newaxis, ...],
-                                                thread_embeddings)
+                                                thread_embeddings,
+                                                metric='cosine')
         
         return thread_ids[best_thread][0]
 
@@ -143,6 +144,11 @@ class DialogueManager(object):
              'Where on the interwebz?'
              'https://www.python.org/dev/peps/pep-0020/']
         )
+        self.chatbot.train([
+            'What is AI?',
+            ('I like the definition: AI is what we think is intelligent, but'
+             'which has not yet been achieved')
+        ])
 
     def generate_answer(self, question):
         """
