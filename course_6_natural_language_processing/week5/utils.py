@@ -7,13 +7,14 @@ import pandas as pd
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 
+
 # Paths for all resources for the bot.
 RESOURCE_PATH = {
     'INTENT_RECOGNIZER': ['resource', 'intent_recognizer.pkl'],
     'TAG_CLASSIFIER': ['resource', 'tag_classifier.pkl'],
     'TFIDF_VECTORIZER': ['resource', 'tfidf_vectorizer.pkl'],
     'THREAD_EMBEDDINGS_FOLDER': ['resource', 'thread_embeddings_by_tags'],
-    'WORD_EMBEDDINGS': ['resource', 'word_embeddings.tsv'],
+    'WORD_EMBEDDINGS': ['resource', 'starspace_embedding.tsv'],
 }
 
 
@@ -64,11 +65,11 @@ def load_embeddings(embeddings_path):
     embeddings_df = pd.read_csv(embeddings_path, 
                                 sep='\t',
                                 header=None)
-    
+
     # Convert to dict
     words = embeddings_df.loc[:, 0].values
     vectors = embeddings_df.loc[:, 1:].values
-    vectors.dtype = np.float32
+    vectors = vectors.astype(np.float32)
 
     embeddings = dict()
     
@@ -89,7 +90,8 @@ def question_to_vec(question, embeddings, dim=300, verbose=False):
     question : str
         The quering question
     embeddings : dict-like
-        A dict-like structure where the key is a word and its value is the embedding
+        A dict-like structure where the key is a word and its value is the
+        embedding
     dim : int
         Size of the representation
     verbose : bool
@@ -107,7 +109,6 @@ def question_to_vec(question, embeddings, dim=300, verbose=False):
     for word in question.split():
         count += 1
         try:
-            # wv_embeddings has the function .get_vector, however [] works for dicts as well
             result += embeddings[word]
         except KeyError:
             if count > 0:

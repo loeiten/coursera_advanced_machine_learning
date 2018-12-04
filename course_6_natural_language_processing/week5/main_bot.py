@@ -9,6 +9,8 @@ import os
 import json
 import sys
 from requests.compat import urljoin
+from dialogue_manager import DialogueManager
+from utils import RESOURCE_PATH
 
 
 if 'UTF-8' not in sys.stdout.encoding:
@@ -22,7 +24,16 @@ if 'UTF-8' not in sys.stdout.encoding:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--token', type=str, default='')
+    parser.add_argument('--token',
+                        '-t',
+                        help='The telegram token',
+                        type=str,
+                        required=True)
+    parser.add_argument('--dialogue',
+                        '-d',
+                        choices=['simple', 'advanced'],
+                        help='The dialogue manager',
+                        default='advanced')
     return parser.parse_args()
 
 
@@ -161,6 +172,7 @@ def main():
     """
     args = parse_args()
     token = args.token
+    dialogue = args.dialogue
 
     if not token:
         if 'TELEGRAM_TOKEN' not in os.environ:
@@ -177,8 +189,12 @@ def main():
     # This is the point where you plug it into the Telegram bot.
     # Do not forget to import all needed dependencies when you do so.
 
-    simple_manager = SimpleDialogueManager()
-    bot = BotHandler(token, simple_manager)
+    if dialogue == 'simple':
+        manager = SimpleDialogueManager()
+    elif dialogue == 'advanced':
+        manager = DialogueManager(RESOURCE_PATH)
+
+    bot = BotHandler(token, manager)
 
     ###############################################################
 
