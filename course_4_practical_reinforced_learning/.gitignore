@@ -78,4 +78,5 @@ debian/files
 
 # Own stuff
 *.pid
+videos/
 
