@@ -1,54 +1,94 @@
-# most of this code was politely stolen from https://github.com/berkeleydeeprlcourse/homework/
-# all creadit goes to https://github.com/abhishekunique (if i got the author right)
+"""
+Most of this code was politely stolen from https://github.com/berkeleydeeprlcourse/homework/
+All creadit goes to https://github.com/abhishekunique (if I got the author right)
+"""
+
 import sys
 import random
 import numpy as np
-def weighted_choice(v, p):
-   total = sum(p)
-   r = random.uniform(0, total)
-   upto = 0
-   for c, w in zip(v,p):
-      if upto + w >= r:
-         return c
-      upto += w
-   assert False, "Shouldn't get here"
 
+
+def weighted_choice(v, p):
+    """
+    Returns a choice in v given the weights p
+    
+    Parameters
+    ----------
+    v : array-like
+        The possible choices
+    p : array-like
+        The weights of the choices
+    
+    Returns
+    -------
+    c : object
+        The chosen element of v
+    """
+    
+    total = sum(p)
+    r = random.uniform(0, total)
+    upto = 0
+    for c, w in zip(v, p):
+        if upto + w >= r:
+            return c
+        upto += w
+    raise RuntimeError('weighted_choice should\'ve exited')
+
+    
 class MDP:
+    """
+    Defines a Markov Decision Process.
+    
+    This class is compatible with the 'gym' environment.
+    """
+    
     def __init__(self, transition_probs, rewards, initial_state=None):
         """
-        Defines an MDP. Compatible with gym Env.
-        :param transition_probs: transition_probs[s][a][s_next] = P(s_next | s, a)
+        The constructor of MDP
+
+        States and actions can be anything you can use as dict keys,
+        but we recommend that you use strings or integers
+
+        Parameters
+        ----------
+        transition_probs : dict-like
+            transition_probs[s][a][s_next] = P(s_next | s, a)
             A dict[state -> dict] of dicts[action -> dict] of dicts[next_state -> prob]
             For each state and action, probabilities of next states should sum to 1
             If a state has no actions available, it is considered terminal
-        :param rewards: rewards[s][a][s_next] = r(s,a,s')
+        rewards : dict-like
+            rewards[s][a][s_next] = r(s,a,s')
             A dict[state -> dict] of dicts[action -> dict] of dicts[next_state -> reward]
-            The reward for anything not mentioned here is zero.
-        :param get_initial_state: a state where agent starts or a callable() -> state
+            The reward for anything not mentioned here is zero
+        initial_state : None or object
+            A state where agent starts or a callable() -> state
             By default, picks initial state at random.
 
-        States and actions can be anything you can use as dict keys, but we recommend that you use strings or integers
-
+        Examples
+        --------
         Here's an example from MDP depicted on http://bit.ly/2jrNHNr
-        transition_probs = {
-              's0':{
-                'a0': {'s0': 0.5, 's2': 0.5},
-                'a1': {'s2': 1}
-              },
-              's1':{
-                'a0': {'s0': 0.7, 's1': 0.1, 's2': 0.2},
-                'a1': {'s1': 0.95, 's2': 0.05}
-              },
-              's2':{
-                'a0': {'s0': 0.4, 's1': 0.6},
-                'a1': {'s0': 0.3, 's1': 0.3, 's2':0.4}
-              }
-            }
-        rewards = {
-            's1': {'a0': {'s0': +5}},
-            's2': {'a1': {'s0': -1}}
-        }
+        
+        >>> transition_probs = {
+        ...       's0':{
+        ...         'a0': {'s0': 0.5, 's2': 0.5},
+        ...         'a1': {'s2': 1}
+        ...       },
+        ...       's1':{
+        ...         'a0': {'s0': 0.7, 's1': 0.1, 's2': 0.2},
+        ...         'a1': {'s1': 0.95, 's2': 0.05}
+        ...       },
+        ...       's2':{
+        ...         'a0': {'s0': 0.4, 's1': 0.6},
+        ...         'a1': {'s0': 0.3, 's1': 0.3, 's2':0.4}
+        ...       }
+        ...     }
+        >>> rewards = {
+        ...     's1': {'a0': {'s0': +5}},
+        ...     's2': {'a1': {'s0': -1}}
+        ...     }  
+        >>> mdp = MDP(transition_probs, rewards, initial_state='s0')
         """
+        
         self._check_param_consistency(transition_probs, rewards)
         self._transition_probs = transition_probs
         self._rewards = rewards
@@ -57,33 +97,125 @@ class MDP:
         self.reset()
 
     def get_all_states(self):
-        """ return a tuple of all possiblestates """
+        """
+        Returns a tuple of all possible states
+        
+        Returns
+        -------
+        tuple
+            The tuple of possible states
+        """
         return tuple(self._transition_probs.keys())
 
     def get_possible_actions(self, state):
-        """ return a tuple of possible actions in a given state """
+        """
+        Returns a tuple of possible actions in a given state
+        
+        Parameters
+        ----------
+        state : object
+            The state to get the action from
+            The state must be a valid key of the transition probabilities
+            
+        Returns
+        -------
+        tuple
+            A tuple of the possible actions
+        """
         return tuple(self._transition_probs.get(state, {}).keys())
 
     def is_terminal(self, state):
-        """ return True if state is terminal or False if it isn't """
+        """
+        Checks whether a state is terminal
+        
+        Parameters
+        ----------
+        state : object
+            The state to check
+            The state must be a valid key of the transition probabilities
+            
+        Returns
+        -------
+        bool
+            True if the state is terminal
+        """
+        
         return len(self.get_possible_actions(state)) == 0
 
     def get_next_states(self, state, action):
-        """ return a dictionary of {next_state1 : P(next_state1 | state, action), next_state2: ...} """
+        """
+        Gets the next state
+        
+        Parameters
+        ----------
+        state : object
+            The state to do the action in
+            The state must be a valid key of the transition probabilities
+        action : object
+            The action
+            The action must be a valid key of the state        
+        
+        Returns
+        -------
+        dict-like
+            Returns a dictionary on the form 
+            >>> {next_state1 : P(next_state1 | state, action), next_state2: ...}
+        """
+        
         assert action in self.get_possible_actions(state), "cannot do action %s from state %s" % (action, state)
         return self._transition_probs[state][action]
 
     def get_transition_prob(self, state, action, next_state):
-        """ return P(next_state | state, action) """
+        """
+        Get the transition probability
+        
+        Parameters
+        ----------
+        state : object
+            The state to do the action in
+            The state must be a valid key of the transition probabilities
+        action : object
+            The action
+            The action must be a valid key of the state        
+        next_state : object
+            A state proceeding the the action
+            The state must be a valid next state
+            
+        Returns
+        -------
+        float
+            The probability of the transition
+        """
+        
         return self.get_next_states(state, action).get(next_state, 0.0)
 
     def get_reward(self, state, action, next_state):
-        """ return the reward you get for taking action in state and landing on next_state"""
+        """
+        Gets the reward you get for taking action in state and landing on next_state
+        
+        Parameters
+        ----------
+        state : object
+            The state to do the action in
+            The state must be a valid key of the transition probabilities
+        action : object
+            The action
+            The action must be a valid key of the state        
+        next_state : object
+            A state proceeding the the action
+            The state must be a valid next state
+            
+        Returns
+        -------
+        float
+            The reward of the transition
+        """
+        
         assert action in self.get_possible_actions(state), "cannot do action %s from state %s" % (action, state)
         return self._rewards.get(state, {}).get(action, {}).get(next_state, 0.0)
 
     def reset(self):
-        """ reset the game, return the initial state"""
+        """Resets the game, return the initial state"""
         if self._initial_state is None:
             self._current_state = random.choice(tuple(self._transition_probs.keys()))
         elif self._initial_state in self._transition_probs:
@@ -95,7 +227,25 @@ class MDP:
         return self._current_state
 
     def step(self, action):
-        """ take action, return next_state, reward, is_done, empty_info """
+        """
+        Takes an action
+        
+        Parameters
+        ----------
+        action : object
+            The action must be a valid key of the current state      
+            
+        Returns
+        -------
+        next_state : object
+            The next state
+        reward : float
+            The obtained reward
+        is_done : bool
+            Whether or not the game terminated
+        dict
+            Placeholder for the information dict
+        """
         possible_states, probs = zip(*self.get_next_states(self._current_state, action).items())
         next_state = weighted_choice(possible_states, p=probs)
         reward = self.get_reward(self._current_state, action, next_state)
@@ -104,9 +254,25 @@ class MDP:
         return next_state, reward, is_done, {}
 
     def render(self):
+        """Renders the current state"""
         print("Currently at %s" % self._current_state)
 
     def _check_param_consistency(self, transition_probs, rewards):
+        """
+        Asserts that the parameters are consistent
+        
+        Parameters
+        ----------
+        transition_probs : dict-like
+            transition_probs[s][a][s_next] = P(s_next | s, a)
+            A dict[state -> dict] of dicts[action -> dict] of dicts[next_state -> prob]
+            For each state and action, probabilities of next states should sum to 1
+            If a state has no actions available, it is considered terminal
+        rewards : dict-like
+            rewards[s][a][s_next] = r(s,a,s')
+            A dict[state -> dict] of dicts[action -> dict] of dicts[next_state -> reward]
+            The reward for anything not mentioned here is zero
+        """
         for state in transition_probs:
             assert isinstance(transition_probs[state], dict), "transition_probs for %s should be a dictionary " \
                                                               "but is instead %s" % (
@@ -133,6 +299,7 @@ class MDP:
         assert None not in transition_probs, "please do not use None as a state identifier. " + msg
         assert None not in rewards, "please do not use None as an action identifier. " + msg
 
+        
 class FrozenLakeEnv(MDP):
     """
     Winter is here. You and your friends were tossing around a frisbee at the park
@@ -156,7 +323,6 @@ class FrozenLakeEnv(MDP):
 
     The episode ends when you reach the goal or fall in a hole.
     You receive a reward of 1 if you reach the goal, and zero otherwise.
-
     """
 
     MAPS = {
@@ -179,7 +345,21 @@ class FrozenLakeEnv(MDP):
     }
 
 
-    def __init__(self, desc=None, map_name="4x4", slip_chance=0.2):
+    def __init__(self, desc=None, map_name='4x4', slip_chance=0.2):
+        """
+        The constructor of FrozenLakeEnv
+        
+        Parameters
+        ----------
+        desc : None or list
+            If None, the map will be chosen from map_name
+            If list, the map must be a valid map (i.e. a list of 
+            strings of equal lenght containing S, F, H or G
+        map_name : '4x4' or '8x8'
+            Name of premade map
+        slip_chance : float
+            The chance of slipping
+        """
         if desc is None and map_name is None:
             raise ValueError('Must provide either desc or map_name')
         elif desc is None:
@@ -211,7 +391,7 @@ class FrozenLakeEnv(MDP):
 
         transition_probs = {s : {} for s in states}
         rewards = {s : {} for s in states}
-        for (row,col) in states:
+        for (row, col) in states:
             if desc[row, col]  in "GH": continue
             for action_i in range(len(actions)):
                 action = actions[action_i]
@@ -232,8 +412,7 @@ class FrozenLakeEnv(MDP):
         MDP.__init__(self, transition_probs, rewards, initial_state)
 
     def render(self):
+        """Renders the game"""s
         desc_copy = np.copy(self.desc)
         desc_copy[self._current_state] = '*'
         print('\n'.join(map(''.join,desc_copy)), end='\n\n')
-
-
