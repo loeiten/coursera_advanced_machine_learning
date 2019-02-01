@@ -412,7 +412,7 @@ class FrozenLakeEnv(MDP):
         MDP.__init__(self, transition_probs, rewards, initial_state)
 
     def render(self):
-        """Renders the game"""s
+        """Renders the game"""
         desc_copy = np.copy(self.desc)
         desc_copy[self._current_state] = '*'
         print('\n'.join(map(''.join,desc_copy)), end='\n\n')
