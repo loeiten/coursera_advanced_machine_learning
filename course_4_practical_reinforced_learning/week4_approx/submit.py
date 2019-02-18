@@ -6,7 +6,9 @@ import grading
 
 def submit_cartpole(generate_session, email, token):
     sessions = [generate_session() for _ in range(100)]
-    session_rewards, _, _ = map(np.array, zip(*sessions))
+    # Bug: See https://www.coursera.org/learn/practical-rl/programming/L47Fs/approximate-qlearning-cartpole/discussions/threads/K9-K8lblEeiw7g60zbwcSA
+    # session_rewards, _, _ = map(np.array, zip(*sessions))
+    session_rewards = np.array(sessions)
     grader = grading.Grader("RDofv-QXEeeaGw6kpIOf3g")
     grader.set_answer("NRNkl", int(np.mean(session_rewards)))
     grader.submit(email, token)
