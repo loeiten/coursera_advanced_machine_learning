@@ -12,9 +12,7 @@ def submit_cartpole(generate_session, email, token):
     grader.submit(email, token)
 
 
-def submit_kungfu(agent, env, evaluate, email, token):
-    sessions = [evaluate(agent=agent, env=env, n_games=1) for _ in range(100)]
-    session_rewards = np.array(sessions)
+def submit_kungfu(session_rewards, email, token):
     grader = grading.Grader("6sPnVCn6EeieSRL7rCBNJA")
     # NOTE: Bug, so multiplied with 100, see
     #       https://www.coursera.org/learn/practical-rl/programming/95h2n/grader-a3c/discussions/threads/Q1XYCe08EeigTgpIFoGjKg
