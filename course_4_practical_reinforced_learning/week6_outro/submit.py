@@ -10,12 +10,12 @@ def submit_bandits(scores, email, token):
     thompson_sampling_agent = None
 
     for agent in scores:
-        if "EpsilonGreedyAgent" in agent.name:
-            epsilon_greedy_agent = agent.name
-        if "UCBAgent" in agent.name:
-            ucb_agent = agent.name
-        if "ThompsonSamplingAgent" in agent.name:
-            thompson_sampling_agent = agent.name
+        if "EpsilonGreedyAgent" in agent:
+            epsilon_greedy_agent = agent
+        if "UCBAgent" in agent:
+            ucb_agent = agent
+        if "ThompsonSamplingAgent" in agent:
+            thompson_sampling_agent = agent
 
     assert epsilon_greedy_agent is not None
     assert ucb_agent is not None
