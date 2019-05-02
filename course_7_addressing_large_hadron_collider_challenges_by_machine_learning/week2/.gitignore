@@ -1,3 +1,5 @@
 training.csv.gz
 test.csv.gz
+submission_file.csv.gz
+*.pkl
 
