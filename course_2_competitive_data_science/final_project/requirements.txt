@@ -1,5 +1,5 @@
 matplotlib==2.2.2
-tensorflow==1.8.0
+tensorflow==1.13.1
 requests==2.20.1
 Keras==2.2.0
 numpy==1.15.0
