@@ -110,10 +110,9 @@ venv.bak/
 course_1_introduction_to_deep_learning/readonly/
 annotations
 checkpoint
-weights.h5
 *.swp
 *.hdf5
-*.h5
+*.h5*
 *.tgz
 *.mat
 *.zip
@@ -123,7 +122,7 @@ weights.h5
 *.data*
 *delme*
 lfw_attributes.txt
-*.csv
+*.csv*
 ~*
 ._*
 logs/
