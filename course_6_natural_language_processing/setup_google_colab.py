@@ -18,7 +18,7 @@ def setup_common():
     os.system("pip install jedi==0.11.0")
     os.system("pip install libarchive==0.4.4")
     os.system("pip install mock==2.0.0")
-    os.system("pip install parso==0.5.1")
+    os.system("pip install parso==0.1.0")
     os.system("pip install pbr==3.1.1")
     os.system("pip install regex==2017.11.9")
 
